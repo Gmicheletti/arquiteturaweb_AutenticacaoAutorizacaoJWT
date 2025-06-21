@@ -1,7 +1,6 @@
 package com.example.authserver;
 
 import com.example.authserver.repository.UserRepository;
-import com.example.authserver.service.AuthService;
 import com.example.authserver.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest
@@ -25,9 +23,6 @@ class AuthIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private AuthService authService;
     
     @Autowired
     private JwtService jwtService;
@@ -122,8 +117,8 @@ void testLoginSuccess() throws Exception {
     @Test
     void testProtectedAdminEndpointAccessDeniedWithUserToken() throws Exception {
         String userToken = mockMvc.perform(post("/auth/login")
-                .param("username", "admin")
-                .param("password", "admin123")
+                .param("username", "user")
+                .param("password", "user123")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                .andExpect(status().isOk())
                .andReturn().getResponse().getContentAsString();

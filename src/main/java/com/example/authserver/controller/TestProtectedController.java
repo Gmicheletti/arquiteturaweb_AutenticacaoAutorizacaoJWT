@@ -26,4 +26,7 @@ public class TestProtectedController {
     public String adminOnly() {
         return "Bem-vindo, Administrador! Este é um recurso restrito.";
     }
+
+
+
 }

@@ -8,18 +8,21 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.boot.CommandLineRunner;
 
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.beans.factory.annotation.Value;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -28,13 +31,13 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    // PasswordEncoder: Pra codificar senhas de forma segura
+    // PasswordEncoder: Para codificar senhas com segurança
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // UserDetailsService: Como o Spring Security vai carregar os detalhes do usuário
+    // UserDetailsService: Como o Spring Security carrega detalhes do usuário
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
         return username -> userRepository.findByUsername(username)
@@ -46,38 +49,50 @@ public class SecurityConfig {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
     }
 
-    // JwtDecoder: O componente que o Spring Security usa pra decodificar e validar JWTs
+    // JwtDecoder: Decodificador e validador de JWTs
     @Bean
     public JwtDecoder jwtDecoder() {
-        // A chave secreta é convertida pra um SecretKeySpec para HMAC
         SecretKeySpec secretKey = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSha256");
-        // Constrói o NimbusJwtDecoder com a chave secreta. Ele fará a validação da assinatura.
         return NimbusJwtDecoder.withSecretKey(secretKey).build();
     }
 
-    // SecurityFilterChain: Configura as regras de segurança HTTP
+    // Conversor de claims "role" para GrantedAuthority
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            String role = jwt.getClaimAsString("role");
+            if (role == null) {
+                return List.of();
+            }
+            return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        });
+        return converter;
+    }
+
+    // Configuração principal de segurança HTTP
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable) // Desabilita CSRF pra APIs RESTful stateless
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // API não manterá estado de sessão
+            .csrf(AbstractHttpConfigurer::disable) // Desativa CSRF para APIs REST stateless
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/login").permitAll() // Permite acesso público ao login
-                .requestMatchers("/auth/validate").permitAll() // Permite acesso público ao endpoint de validação
-                .requestMatchers("/h2-console/**").permitAll() // Console H2
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Documentação Swagger
-                .anyRequest().authenticated() // Qualquer outra requisição exige um JWT válido
+                .requestMatchers("/auth/login").permitAll()
+                .requestMatchers("/auth/validate").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN") // Protege endpoints admin
+                .anyRequest().authenticated()
             )
-            //.headers(headers -> headers.frameOptions(frameOptions -> headers.frameOptions().sameOrigin())) //Obsoleto
-            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))// Necessário para o H2 console
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
-                // Ao chamar .jwt(), o Spring Security usará o JwtDecoder que definimos como um Bean.
-            }));
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // Necessário para H2 console
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> 
+                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
+            ));
 
         return http.build();
     }
 
-    // CommandLineRunner: Popula o banco de dados H2 com usuários iniciais ao iniciar a aplicação
+    // Popula o banco H2 com usuários iniciais
     @Bean
     public CommandLineRunner initData(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
