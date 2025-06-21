@@ -43,14 +43,14 @@ class AuthIntegrationTests {
         userRepository.findByUsername("admin").ifPresentOrElse(
                 user -> { /* Já existe */ },
                 () -> {
-                    com.example.authserver.model.User admin = new com.example.authserver.model.User(null, "admin", passwordEncoder.encode("123456"), "ADMIN");
+                    com.example.authserver.model.User admin = new com.example.authserver.model.User(null, "admin", passwordEncoder.encode("admin123"), "ADMIN", "admin@admin.com.br");
                     userRepository.save(admin);
                 }
         );
         userRepository.findByUsername("user").ifPresentOrElse(
                 user -> { /* Já existe */ },
                 () -> {
-                    com.example.authserver.model.User regularUser = new com.example.authserver.model.User(null, "user", passwordEncoder.encode("password"), "USER");
+                    com.example.authserver.model.User regularUser = new com.example.authserver.model.User(null, "user", passwordEncoder.encode("user123"), "USER","user@user.com.br");
                     userRepository.save(regularUser);
                 }
         );
@@ -60,7 +60,7 @@ class AuthIntegrationTests {
 void testLoginSuccess() throws Exception {
     String token = mockMvc.perform(post("/auth/login")
             .param("username", "admin")
-            .param("password", "123456")
+            .param("password", "admin123")
             .contentType(MediaType.APPLICATION_FORM_URLENCODED))
            .andExpect(status().isOk())
            .andReturn().getResponse().getContentAsString();
@@ -77,7 +77,7 @@ void testLoginSuccess() throws Exception {
     void testLoginFailureInvalidPassword() throws Exception {
         mockMvc.perform(post("/auth/login")
                 .param("username", "admin")
-                .param("password", "senhaErrada")
+                .param("password", "errada123")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                .andExpect(status().isUnauthorized())
                .andExpect(content().string(containsString("Senha incorreta.")));
@@ -93,7 +93,7 @@ void testLoginSuccess() throws Exception {
     void testProtectedEndpointAccessWithValidToken() throws Exception {
         String token = mockMvc.perform(post("/auth/login")
                 .param("username", "user")
-                .param("password", "password")
+                .param("password", "user123")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                .andExpect(status().isOk())
                .andReturn().getResponse().getContentAsString();
@@ -108,7 +108,7 @@ void testLoginSuccess() throws Exception {
     void testProtectedAdminEndpointAccessWithAdminToken() throws Exception {
         String adminToken = mockMvc.perform(post("/auth/login")
                 .param("username", "admin")
-                .param("password", "123456")
+                .param("password", "admin123")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                .andExpect(status().isOk())
                .andReturn().getResponse().getContentAsString();
@@ -122,8 +122,8 @@ void testLoginSuccess() throws Exception {
     @Test
     void testProtectedAdminEndpointAccessDeniedWithUserToken() throws Exception {
         String userToken = mockMvc.perform(post("/auth/login")
-                .param("username", "user")
-                .param("password", "password")
+                .param("username", "admin")
+                .param("password", "admin123")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                .andExpect(status().isOk())
                .andReturn().getResponse().getContentAsString();

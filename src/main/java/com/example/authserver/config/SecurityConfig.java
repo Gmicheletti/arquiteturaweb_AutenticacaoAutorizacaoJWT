@@ -81,12 +81,12 @@ public class SecurityConfig {
     public CommandLineRunner initData(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
-                User admin = new User(null, "admin", passwordEncoder.encode("123456"), "ADMIN");
+                User admin = new User(null, "admin", passwordEncoder.encode("admin123"), "ADMIN", "admin@admin.com.br");
                 userRepository.save(admin);
                 System.out.println("✅ Usuário 'admin' criado com senha codificada.");
             }
             if (userRepository.findByUsername("user").isEmpty()) {
-                User user = new User(null, "user", passwordEncoder.encode("password"), "USER");
+                User user = new User(null, "user", passwordEncoder.encode("user123"), "USER", "user@user.com.br");
                 userRepository.save(user);
                 System.out.println("✅ Usuário 'user' criado com senha codificada.");
             }

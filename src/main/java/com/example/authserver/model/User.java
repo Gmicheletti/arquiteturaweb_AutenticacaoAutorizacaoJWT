@@ -20,4 +20,6 @@ public class User {
     private String password; // Senha codificada
     @Column(nullable = false)
     private String role; // Ex: "ADMIN", "USER"
+    @Column(unique = true, nullable = false)
+    private String email;
 }
