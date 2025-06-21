@@ -68,7 +68,8 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Documentação Swagger
                 .anyRequest().authenticated() // Qualquer outra requisição exige um JWT válido
             )
-            .headers(headers -> headers.frameOptions(frameOptions -> headers.frameOptions().sameOrigin())) // Necessário para o H2 console
+            //.headers(headers -> headers.frameOptions(frameOptions -> headers.frameOptions().sameOrigin())) //Obsoleto
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))// Necessário para o H2 console
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
                 // Ao chamar .jwt(), o Spring Security usará o JwtDecoder que definimos como um Bean.
             }));
