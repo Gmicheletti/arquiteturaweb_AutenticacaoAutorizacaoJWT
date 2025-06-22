@@ -82,11 +82,12 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN") // Protege endpoints admin
-                .requestMatchers("/cursos/**").hasRole("USER")
                 .requestMatchers("/alunos/**").hasRole("ADMIN")
+                .requestMatchers("/cursos/**").authenticated()
 
 
                 .anyRequest().authenticated()
+                
             )
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // Necessário para H2 console
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> 
