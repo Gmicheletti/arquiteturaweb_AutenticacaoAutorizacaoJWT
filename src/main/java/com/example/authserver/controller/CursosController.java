@@ -27,22 +27,22 @@ public class CursosController {
     @Autowired
     private CursosService cursosService;
 
-    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'ADMIN'")
-    @PreAuthorize("hasRole('ADMIN')") // Exige que o JWT do usuário tenha a role 'ADMIN'
+    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'USER'")
+    @PreAuthorize("hasRole('USER')") // Exige que o JWT do usuário tenha a role 'ADMIN'
     @GetMapping
     public List<Cursos> getAll() {
         return cursosService.findAll();
     }
 
-    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'ADMIN'")
-    @PreAuthorize("hasRole('ADMIN')") // Exige que o JWT do usuário tenha a role 'ADMIN'
+    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'USER'")
+    @PreAuthorize("hasRole('USER')") // Exige que o JWT do usuário tenha a role 'ADMIN'
     @PostMapping
     public Cursos create(@RequestBody Cursos curso) {
         return cursosService.save(curso);
     }
 
-    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'ADMIN'")
-    @PreAuthorize("hasRole('ADMIN')") // Exige que o JWT do usuário tenha a role 'ADMIN'
+    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'USER'")
+    @PreAuthorize("hasRole('USER')") // Exige que o JWT do usuário tenha a role 'ADMIN'
     @GetMapping("/{id}")
     public ResponseEntity<Cursos> getCurso(@PathVariable Long id) {
         return cursosService.findById(id)
@@ -50,8 +50,8 @@ public class CursosController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'ADMIN'")
-    @PreAuthorize("hasRole('ADMIN')") // Exige que o JWT do usuário tenha a role 'ADMIN'
+    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'USER'")
+    @PreAuthorize("hasRole('USER')") // Exige que o JWT do usuário tenha a role 'ADMIN'
     @PutMapping("/{id}")
     public ResponseEntity<Cursos> updateCurso(@PathVariable Long id, @RequestBody Cursos curso) {
         return cursosService.update(id, curso)
@@ -59,8 +59,8 @@ public class CursosController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'ADMIN'")
-    @PreAuthorize("hasRole('ADMIN')") // Exige que o JWT do usuário tenha a role 'ADMIN'
+    @Operation(summary = "Endpoint acessível apenas por usuários com a role 'USER'")
+    @PreAuthorize("hasRole('USER')") // Exige que o JWT do usuário tenha a role 'ADMIN'
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         return cursosService.delete(id);
