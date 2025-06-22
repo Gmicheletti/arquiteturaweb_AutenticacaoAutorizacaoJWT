@@ -82,8 +82,6 @@ public class SecurityConfig {
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN") // Protege endpoints admin
-                .requestMatchers("/alunos/**").hasRole("ADMIN")
-                .requestMatchers("/cursos/**").authenticated()
 
 
                 .anyRequest().authenticated()
