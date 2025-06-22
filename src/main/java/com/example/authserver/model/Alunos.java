@@ -25,7 +25,7 @@ public class Alunos {
     private Long id;
     private String nome;
     private String email;
-    Date dataNascimento;
+    private Date dataNascimento;
 
     @ManyToOne
     @JoinColumn(name = "curso_id")
