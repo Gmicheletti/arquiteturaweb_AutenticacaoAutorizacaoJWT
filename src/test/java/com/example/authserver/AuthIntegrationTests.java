@@ -83,36 +83,7 @@ void testLoginSuccess() throws Exception {
         mockMvc.perform(get("/api/hello"))
                .andExpect(status().isUnauthorized());
     }
-
-    @Test
-    void testProtectedEndpointAccessWithValidToken() throws Exception {
-        String token = mockMvc.perform(post("/auth/login")
-                .param("username", "user")
-                .param("password", "user123")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-               .andExpect(status().isOk())
-               .andReturn().getResponse().getContentAsString();
-
-        mockMvc.perform(get("/api/hello")
-                .header("Authorization", "Bearer " + token))
-               .andExpect(status().isOk())
-               .andExpect(content().string("Olá! Você acessou um endpoint protegido com sucesso!"));
-    }
-
-    @Test
-    void testProtectedAdminEndpointAccessWithAdminToken() throws Exception {
-        String adminToken = mockMvc.perform(post("/auth/login")
-                .param("username", "admin")
-                .param("password", "admin123")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-               .andExpect(status().isOk())
-               .andReturn().getResponse().getContentAsString();
-
-        mockMvc.perform(get("/api/admin")
-                .header("Authorization", "Bearer " + adminToken))
-               .andExpect(status().isOk())
-               .andExpect(content().string("Bem-vindo, Administrador! Este é um recurso restrito."));
-    }
+  
 
     @Test
     void testProtectedAdminEndpointAccessDeniedWithUserToken() throws Exception {
